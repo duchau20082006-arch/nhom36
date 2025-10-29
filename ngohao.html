@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <!-- =========================================================
+       PORTFOLIO: NGÔ HOÀNG HẢO – INTERACTIVE + DARK TECH MODE
+       Mục tiêu: Nhiều hiệu ứng nhất có thể + Dark Mode công nghệ
+       Ghi chú:
+       - File này giữ nguyên cấu trúc cơ bản, thêm rất nhiều hiệu ứng tương tác
+       - Đã tối ưu để chạy thuần HTML/CSS/JS (CDN) – không cần build step
+       - Có thể chỉnh sửa nội dung cá nhân tại SECTION "THÔNG TIN CÁ NHÂN"
+       - Có hỗ trợ: AOS, Parallax nhẹ, Cursor Particles, Lightbox, Project Modal,
+         Skill Progress on Scroll, Card Tilt, Keyboard Shortcuts, Dark Mode, v.v.
+       - Mẹo: Tìm "TODO:" trong file để thay nội dung theo ý bạn
+       ========================================================= -->
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0f1226" />
+  <title>Ngô Hoàng Hảo – Portfolio</title>
+
+  <!-- ========================= 3rd-party libs ========================= -->
+  <!-- Bootstrap -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <!-- Font Awesome -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet" />
+  <!-- AOS (Animate On Scroll) -->
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet" />
+  <!-- VanillaTilt for 3D tilt effects -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+
+  <!-- ========================= Styles ========================= -->
+  <style>
+    /* =============================================================
+       CSS VARIABLES – dễ dàng đổi theme tại đây
+       ============================================================= */
+    :root {
+      --bg: #0b0f1a;              /* nền tối chủ đạo */
+      --bg-2: #0f1226;            /* nền tối thứ cấp */
+      --text: #e6e8ff;            /* chữ chính sáng */
+      --muted: #a2a8d3;           /* chữ phụ */
+      --accent: #5f7cff;          /* xanh lam neon */
+      --accent-2: #9b5cff;        /* tím neon */
+      --accent-3: #35d0ff;        /* xanh cyan neon */
+      --card: #131735;            /* nền card */
+      --card-2: #1a1f47;          /* nền card hover */
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --border: 1px solid rgba(255,255,255,0.08);
+      --glow: drop-shadow(0 0 12px rgba(95,124,255,.6)) drop-shadow(0 0 24px rgba(53,208,255,.35));
+      --grid-gap: 24px;
+    }
+
+    /* Light theme (nếu cần) – chuyển qua class .light-mode trên <body> */
+    body.light-mode {
+      --bg: #f7f8ff;
+      --bg-2: #eef2ff;
+      --text: #0b0f1a;
+      --muted: #3a4370;
+      --accent: #3b5bff;
+      --accent-2: #7e34e9;
+      --accent-3: #0aa2c0;
+      --card: #ffffff;
+      --card-2: #f2f4ff;
+      --border: 1px solid rgba(0,0,0,0.08);
+      --glow: drop-shadow(0 0 10px rgba(59,91,255,.45));
+    }
+
+    /* =============================================================
+       GLOBAL
+       ============================================================= */
+    html, body {
+      height: 100%;
+      scroll-behavior: smooth;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, Roboto, Arial, sans-serif;
+    }
+
+    .container-narrow {
+      max-width: 1100px;
+      margin-inline: auto;
+      padding-inline: 16px;
+    }
+
+    .section {
+      padding-block: 80px;
+      position: relative;
+    }
+
+    .section-title {
+      font-size: clamp(26px, 2.4vw, 36px);
+      font-weight: 800;
+      letter-spacing: 0.4px;
+      margin-bottom: 18px;
+      filter: var(--glow);
+      text-shadow: 0 6px 24px rgba(95, 124, 255, 0.15);
+    }
+
+    .section-subtitle {
+      color: var(--muted);
+      margin-bottom: 32px;
+      max-width: 700px;
+    }
+
+    .neon-hr {
+      height: 2px;
+      background: linear-gradient(90deg, transparent, var(--accent), var(--accent-2), var(--accent-3), transparent);
+      opacity: .6;
+      border: 0;
+      margin: 28px 0 36px;
+      filter: drop-shadow(0 0 4px rgba(95,124,255,.4));
+    }
+
+    /* =============================================================
+       HEADER / HERO
+       ============================================================= */
+    header.hero {
+      position: relative;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      text-align: center;
+      padding: 80px 16px 40px;
+      overflow: clip;
+      background:
+        radial-gradient(800px 400px at 10% 10%, rgba(95,124,255,.15), transparent 60%),
+        radial-gradient(1000px 500px at 90% 20%, rgba(155,92,255,.15), transparent 60%),
+        radial-gradient(1000px 500px at 40% 100%, rgba(53,208,255,.15), transparent 60%);
+    }
+
+    /* Canvas cho hiệu ứng cursor particles */
+    canvas#fx-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0; /* phía sau nội dung */
+      pointer-events: none;
+      filter: drop-shadow(0 0 6px rgba(95,124,255,.35));
+    }
+
+    .hero-inner {
+      position: relative;
+      z-index: 1;
+      max-width: 980px;
+      display: grid;
+      gap: 20px;
+      justify-items: center;
+    }
+
+    .avatar-wrap {
+      width: 180px;
+      height: 180px;
+      border-radius: 50%;
+      padding: 4px;
+      background: conic-gradient(from 120deg, var(--accent), var(--accent-2), var(--accent-3), var(--accent));
+      box-shadow: 0 12px 48px rgba(95,124,255,.25);
+    }
+
+    .avatar {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      object-fit: cover;
+      display: block;
+      border: var(--border);
+      filter: saturate(1.1) contrast(1.05);
+      transition: transform .35s ease;
+      background: #111;
+    }
+
+    .avatar:hover { transform: scale(1.04) rotate(2deg); }
+
+    .hero h1 {
+      font-size: clamp(32px, 5vw, 56px);
+      font-weight: 900;
+      letter-spacing: .6px;
+      margin: 4px 0 6px;
+    }
+
+    .typewriter {
+      display: inline-block;
+      border-right: 3px solid var(--accent-3);
+      white-space: nowrap;
+      overflow: hidden;
+      animation: typing 3.8s steps(40, end) 1, blink .9s step-end infinite;
+      font-size: clamp(15px, 2.2vw, 18px);
+      color: var(--muted);
+    }
+
+    @keyframes typing { from { width: 0 } to { width: 100% } }
+    @keyframes blink { 50% { border-color: transparent } }
+
+    .hero-cta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      justify-content: center;
+      margin-top: 8px;
+    }
+
+    .btn-neon {
+      --pad-x: 20px;
+      --pad-y: 12px;
+      padding: var(--pad-y) var(--pad-x);
+      border-radius: 1000px;
+      border: var(--border);
+      background: linear-gradient(135deg, rgba(95,124,255,.12), rgba(155,92,255,.12));
+      color: var(--text);
+      text-decoration: none;
+      font-weight: 700;
+      letter-spacing: .3px;
+      transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+      box-shadow: 0 10px 24px rgba(0,0,0,.25), inset 0 0 0 1px rgba(255,255,255,.04);
+      backdrop-filter: blur(6px);
+    }
+
+    .btn-neon:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 36px rgba(95,124,255,.35);
+      background: linear-gradient(135deg, rgba(95,124,255,.22), rgba(155,92,255,.22));
+    }
+
+    .hero-social a {
+      color: var(--text);
+      opacity: .9;
+      margin: 0 8px;
+      font-size: 20px;
+      transition: transform .2s ease, color .2s ease;
+      text-decoration: none;
+      filter: var(--glow);
+    }
+
+    .hero-social a:hover {
+      color: var(--accent-3);
+      transform: translateY(-2px) scale(1.08);
+    }
+
+    .toggle-dark {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      z-index: 3;
+      border: var(--border);
+      background: linear-gradient(135deg, rgba(95,124,255,.18), rgba(155,92,255,.18));
+      color: var(--text);
+      border-radius: 1000px;
+      padding: 10px 16px;
+      font-weight: 700;
+      letter-spacing: .3px;
+      backdrop-filter: blur(4px);
+    }
+
+    .toggle-dark:hover { filter: brightness(1.15); }
+
+    /* =============================================================
+       CARD / WRAPPER
+       ============================================================= */
+    .cardx {
+      background: var(--card);
+      border: var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow);
+      padding: 20px 20px 18px;
+      transition: transform .25s ease, background .25s ease, border-color .25s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .cardx:hover { background: var(--card-2); transform: translateY(-6px); }
+
+    .cardx .shine {
+      content: "";
+      pointer-events: none;
+      position: absolute;
+      inset: -120% -120% auto auto;
+      width: 240%;
+      height: 240%;
+      background: conic-gradient(from 0deg, transparent 65%, rgba(255,255,255,.08) 75%, transparent 82%);
+      animation: spin 8s linear infinite;
+      opacity: .3;
+      filter: blur(10px);
+    }
+
+    @keyframes spin { to { transform: rotate(1turn) } }
+
+    /* =============================================================
+       THÔNG TIN CÁ NHÂN
+       ============================================================= */
+    .info-list { list-style: none; padding: 0; margin: 0; }
+    .info-list li { display: grid; grid-template-columns: 28px 1fr; gap: 12px; padding: 10px 8px; border-bottom: 1px dashed rgba(255,255,255,.08); }
+    .info-list i { color: var(--accent-3); filter: var(--glow); }
+
+    /* =============================================================
+       SỞ THÍCH – icon grid
+       ============================================================= */
+    .hobby-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: var(--grid-gap); }
+    .hobby { text-align: center; padding: 22px 18px; border-radius: var(--radius-md); background: linear-gradient(180deg, rgba(95,124,255,.08), rgba(155,92,255,.08)); border: var(--border); box-shadow: var(--shadow); transition: transform .22s ease, box-shadow .22s ease; }
+    .hobby:hover { transform: translateY(-6px); box-shadow: 0 22px 40px rgba(0,0,0,.35); }
+    .hobby i { font-size: 28px; margin-bottom: 8px; color: var(--accent-3); }
+
+    /* =============================================================
+       KỸ NĂNG – progress + badges
+       ============================================================= */
+    .skills-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: var(--grid-gap); }
+    .skill {
+      padding: 20px;
+      border-radius: var(--radius-md);
+      border: var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01));
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .skill .label { font-weight: 700; margin-bottom: 6px; }
+    .pbar { height: 12px; background: rgba(255,255,255,.08); border-radius: 1000px; overflow: hidden; border: 1px solid rgba(255,255,255,.06); }
+    .pbar > .bar { height: 100%; width: 0; background: linear-gradient(90deg, var(--accent), var(--accent-2), var(--accent-3)); box-shadow: inset 0 0 12px rgba(255,255,255,.25); transition: width 1s cubic-bezier(.2,.8,.2,1); }
+
+    .skill .badges { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+    .badgex { padding: 6px 10px; border-radius: 1000px; font-size: 12px; border: var(--border); background: rgba(255,255,255,.04); color: var(--muted); }
+
+    /* =============================================================
+       GALLERY – lưới ảnh + Lightbox
+       ============================================================= */
+    .gallery-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: var(--grid-gap); }
+    @media (max-width: 992px) { .gallery-grid { grid-template-columns: repeat(3,1fr); } }
+    @media (max-width: 576px) { .gallery-grid { grid-template-columns: repeat(2,1fr); } }
+    .gimg { position: relative; border-radius: var(--radius-md); overflow: hidden; border: var(--border); box-shadow: var(--shadow); cursor: zoom-in; }
+    .gimg img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s ease; display: block; }
+    .gimg:hover img { transform: scale(1.06); }
+    .gimg::after { content: "Xem"; position: absolute; inset: auto 10px 10px auto; background: rgba(11,15,26,.6); color: #fff; padding: 6px 10px; border-radius: 8px; font-size: 12px; opacity: 0; transform: translateY(6px); transition: .2s ease; }
+    .gimg:hover::after { opacity: 1; transform: translateY(0); }
+
+    .lightbox { position: fixed; inset: 0; background: rgba(0,0,0,.82); display: none; align-items: center; justify-content: center; z-index: 1000; }
+    .lightbox.active { display: flex; }
+    .lightbox img { max-width: 88vw; max-height: 86vh; border-radius: 12px; border: 1px solid rgba(255,255,255,.15); box-shadow: 0 20px 60px rgba(0,0,0,.6); }
+    .lightbox .close, .lightbox .prev, .lightbox .next { position: absolute; top: 50%; transform: translateY(-50%); background: rgba(255,255,255,.1); backdrop-filter: blur(10px); color: #fff; border: 1px solid rgba(255,255,255,.2); width: 42px; height: 42px; display: grid; place-items: center; border-radius: 50%; cursor: pointer; }
+    .lightbox .close { top: 24px; right: 24px; transform: none; }
+    .lightbox .prev { left: 24px; }
+    .lightbox .next { right: 24px; }
+
+    /* =============================================================
+       PROJECTS – cards + modal chi tiết
+       ============================================================= */
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: var(--grid-gap); }
+    .project { border-radius: var(--radius-lg); overflow: hidden; border: var(--border); background: linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,.01)); box-shadow: var(--shadow); position: relative; }
+    .project .thumb { height: 180px; background-size: cover; background-position: center; filter: saturate(1.05) contrast(1.05); transition: transform .35s ease; }
+    .project:hover .thumb { transform: scale(1.05); }
+    .project .content { padding: 18px; }
+    .project .tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 6px; }
+    .tag { font-size: 12px; padding: 6px 10px; border-radius: 1000px; background: rgba(95,124,255,.14); border: 1px solid rgba(95,124,255,.25); color: #dfe6ff; }
+    .project .open-btn { position: absolute; right: 14px; bottom: 14px; border: var(--border); padding: 6px 10px; background: rgba(255,255,255,.06); border-radius: 10px; cursor: pointer; }
+
+    .modalx { position: fixed; inset: 0; display: none; place-items: center; z-index: 1100; }
+    .modalx.active { display: grid; }
+    .modalx .overlay { position: absolute; inset: 0; background: rgba(0,0,0,.7); backdrop-filter: blur(8px); }
+    .modalx .dialog { position: relative; background: var(--card); border: var(--border); border-radius: var(--radius-lg); width: min(920px, 92vw); max-height: 88vh; overflow: auto; box-shadow: var(--shadow); padding: 18px; animation: pop .18s ease; }
+    @keyframes pop { from { transform: translateY(12px) scale(.98); opacity: .6 } }
+
+    /* =============================================================
+       CV DOWNLOAD + FOOTER
+       ============================================================= */
+    .cta-wrap { display: grid; place-items: center; gap: 12px; }
+    .download-btn { padding: 12px 24px; border-radius: 1000px; border: var(--border); background: linear-gradient(135deg, rgba(95,124,255,.2), rgba(155,92,255,.2)); font-weight: 800; letter-spacing: .3px; }
+
+    footer { padding: 46px 16px; text-align: center; color: var(--muted); border-top: 1px solid rgba(255,255,255,.08); background: linear-gradient(180deg, transparent, rgba(255,255,255,.02)); }
+    footer a { color: var(--text); opacity: .9; margin: 0 10px; }
+
+    /* =============================================================
+       SCROLL TOP BUTTON
+       ============================================================= */
+    #scrollTopBtn { position: fixed; right: 22px; bottom: 22px; width: 48px; height: 48px; border-radius: 50%; display: grid; place-items: center; color: #fff; border: 0; cursor: pointer; z-index: 1200; background: radial-gradient(120px 80px at 30% 30%, #5f7cff, #9b5cff); box-shadow: 0 10px 30px rgba(95,124,255,.45); opacity: 0; pointer-events: none; transform: translateY(10px); transition: opacity .18s ease, transform .18s ease; }
+    #scrollTopBtn.show { opacity: 1; pointer-events: auto; transform: translateY(0); }
+
+    /* =============================================================
+       UTILS
+       ============================================================= */
+    .muted { color: var(--muted); }
+    .kbd { font-size: 12px; padding: 2px 6px; border-radius: 6px; background: rgba(255,255,255,.08); border: 1px solid rgba(255,255,255,.14); }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); border: 0; }
+
+    /* Extra spacing for demonstration purposes */
+    .spacer-24 { height: 24px; }
+  </style>
+</head>
+<body>
+  <!-- =============================================================
+       HERO / HEADER – Parallax nhẹ + Cursor Particle Canvas
+       ============================================================= -->
+  <header class="hero" id="home">
+    <button class="toggle-dark" id="darkToggle" title="Chuyển Dark/Light (phím D)"><i class="fa-solid fa-moon"></i> <span class="d-none d-sm-inline">Dark Mode</span></button>
+
+    <!-- Canvas hiệu ứng hạt/particle chạy theo chuột -->
+    <canvas id="fx-canvas"></canvas>
+
+    <div class="hero-inner" data-aos="zoom-in">
+      <div class="avatar-wrap" data-tilt data-tilt-max="8" data-tilt-speed="400" data-tilt-glare="true" data-tilt-max-glare="0.25">
+        <!-- TODO: thay src bằng ảnh thật của bạn -->
+        <img class="avatar" src="avarta.jpg" alt="Ảnh đại diện – Ngô Hoàng Hảo" />
+      </div>
+
+      <h1>Ngô Hoàng Hảo</h1>
+      <div class="typewriter">Sinh viên • Front-end Developer tương lai • TP. Hồ Chí Minh</div>
+
+      <div class="hero-cta">
+        <a href="#about" class="btn-neon"><i class="fa-regular fa-user"></i> Giới thiệu</a>
+        <a href="#skills" class="btn-neon"><i class="fa-solid fa-code"></i> Kỹ năng</a>
+        <a href="#projects" class="btn-neon"><i class="fa-regular fa-folder-open"></i> Dự án</a>
+        <a href="#gallery" class="btn-neon"><i class="fa-regular fa-images"></i> Hình ảnh</a>
+      </div>
+
+      <div class="hero-social mt-2">
+        <a href="https://www.facebook.com/ngo.hao.255771" aria-label="FaceBook"><i class="fab fa-facebook"></i></a>
+        <!-- Zalo -->
+<a href="https://zalo.me/yourzaloid" aria-label="Zalo"><i class="fas fa-comments"></i></a>
+
+<!-- Email -->
+<a href="https://mail.google.com/mail/u/3/#inbox" aria-label="Email"><i class="fas fa-envelope"></i></a>
+
+      </div>
+
+      <div class="muted mt-2">Mẹo: bấm <span class="kbd">D</span> để bật/tắt Dark Mode • <span class="kbd">Ctrl</span> + <span class="kbd">K</span> để bật tìm nhanh</div>
+    </div>
+  </header>
+
+  <!-- =============================================================
+       ABOUT – THÔNG TIN CÁ NHÂN
+       ============================================================= -->
+  <section id="about" class="section">
+    <div class="container-narrow">
+      <h2 class="section-title" data-aos="fade-up"><i class="fa-regular fa-user"></i> Thông tin cá nhân</h2>
+      <p class="section-subtitle" data-aos="fade-up" data-aos-delay="60">Thông tin cơ bản về mình – thay đổi nhanh trong file nếu cần.</p>
+      <hr class="neon-hr" />
+
+      <div class="row g-4">
+        <div class="col-md-6">
+          <div class="cardx" data-aos="fade-right">
+            <span class="shine"></span>
+            <ul class="info-list">
+              <li><i class="fa-regular fa-id-card"></i> <span><strong>Họ & tên:</strong> Ngô Hoàng Hảo</span></li>
+              <li><i class="fa-regular fa-calendar"></i> <span><strong>Ngày sinh:</strong> 18/12/2006</span></li>
+              <li><i class="fa-regular fa-envelope"></i> <span><strong>Email:</strong> 24050093@student.bdu.edu.vn</span></li>
+              <li><i class="fa-solid fa-phone"></i> <span><strong>Điện thoại:</strong> 0383 366 581</span></li>
+              <li><i class="fa-solid fa-location-dot"></i> <span><strong>Quê quán:</strong> TP. Hồ Chí Minh</span></li>
+              <li><i class="fa-solid fa-graduation-cap"></i> <span><strong>Ngành học:</strong> Công nghệ thông tin</span></li>
+            </ul>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <div class="cardx" data-aos="fade-left">
+            <span class="shine"></span>
+            <h5 class="mb-2"><i class="fa-solid fa-heart-pulse"></i> Sở thích</h5>
+            <div class="hobbies">
+  <div class="hobby" data-img="images/dabong.jpg" data-tilt data-tilt-max="10">
+    <i class="fa-regular fa-futbol"></i>
+    <div>Đá bóng</div>
+  </div>
+
+  <div class="hobby" data-img="c:\Users\hao10\Downloads\choigame1.jpg" data-tilt data-tilt-max="10">
+    <i class="fa-solid fa-gamepad"></i>
+    <div>Chơi game</div>
+  </div>
+
+  <div class="hobby" data-img="images/dulich.jpg" data-tilt data-tilt-max="10">
+    <i class="fa-solid fa-plane"></i>
+    <div>Du lịch</div>
+  </div>
+
+  <div class="hobby" data-img="images/amthuc.jpg" data-tilt data-tilt-max="10">
+    <i class="fa-solid fa-utensils"></i>
+    <div>Trải nghiệm ẩm thực</div>
+  </div>
+</div>
+  </section>
+
+  <!-- =============================================================
+       SKILLS – KỸ NĂNG
+       ============================================================= -->
+  <section id="skills" class="section">
+    <div class="container-narrow">
+      <h2 class="section-title" data-aos="fade-up"><i class="fa-solid fa-code"></i> Kỹ năng chuyên môn</h2>
+      <p class="section-subtitle" data-aos="fade-up" data-aos-delay="60">Thanh tiến trình tự chạy khi cuộn tới. Di chuột vào thẻ để thấy tilt 3D.</p>
+      <hr class="neon-hr" />
+
+      <div class="skills-grid">
+        <div class="skill" data-tilt data-tilt-max="8" data-aos="fade-up">
+          <div class="label">HTML / CSS</div>
+          <div class="pbar" aria-label="HTML/CSS level">
+            <div class="bar" data-level="90%"></div>
+          </div>
+          <div class="badges"><span class="badgex">Flexbox</span><span class="badgex">Grid</span><span class="badgex">Responsive</span><span class="badgex">Animation</span></div>
+        </div>
+
+        <div class="skill" data-tilt data-tilt-max="8" data-aos="fade-up" data-aos-delay="60">
+          <div class="label">JavaScript</div>
+          <div class="pbar" aria-label="JavaScript level">
+            <div class="bar" data-level="80%"></div>
+          </div>
+          <div class="badges"><span class="badgex">ES6+</span><span class="badgex">Fetch</span><span class="badgex">Modules</span><span class="badgex">Async</span></div>
+        </div>
+
+        <div class="skill" data-tilt data-tilt-max="8" data-aos="fade-up" data-aos-delay="120">
+          <div class="label">ReactJS</div>
+          <div class="pbar" aria-label="React level">
+            <div class="bar" data-level="70%"></div>
+          </div>
+          <div class="badges"><span class="badgex">Hooks</span><span class="badgex">SPA</span><span class="badgex">Components</span></div>
+        </div>
+
+        <div class="skill" data-tilt data-tilt-max="8" data-aos="fade-up" data-aos-delay="180">
+          <div class="label">Bootstrap</div>
+          <div class="pbar" aria-label="Bootstrap level">
+            <div class="bar" data-level="85%"></div>
+          </div>
+          <div class="badges"><span class="badgex">Grid</span><span class="badgex">Utilities</span><span class="badgex">Components</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =============================================================
+       PROJECTS – DỰ ÁN
+       ============================================================= -->
+  <section id="projects" class="section">
+    <div class="container-narrow">
+      <h2 class="section-title" data-aos="fade-up"><i class="fa-regular fa-folder-open"></i> Dự án tiêu biểu</h2>
+      <p class="section-subtitle" data-aos="fade-up" data-aos-delay="60">Bấm "Chi tiết" để xem modal có ảnh & mô tả.</p>
+      <hr class="neon-hr" />
+
+      <div class="projects-grid">
+        <article class="project" data-aos="fade-up">
+          <div class="thumb" style="background-image:url('https://picsum.photos/640/360?random=11');"></div>
+          <div class="content">
+            <h5>🌐 Website Nhà hàng</h5>
+            <p class="muted">Giao diện hiện đại, responsive, tối ưu Core Web Vitals.</p>
+            <div class="tags"><span class="tag">HTML</span><span class="tag">CSS</span><span class="tag">Bootstrap</span></div>
+            <button class="open-btn" data-project="resto"><i class="fa-regular fa-eye"></i> Chi tiết</button>
+          </div>
+        </article>
+
+        <article class="project" data-aos="fade-up" data-aos-delay="60">
+          <div class="thumb" style="background-image:url('https://picsum.photos/640/360?random=12');"></div>
+          <div class="content">
+            <h5>📝 Todo App</h5>
+            <p class="muted">Quản lý công việc với React, lưu cục bộ, drag & drop nhẹ.</p>
+            <div class="tags"><span class="tag">React</span><span class="tag">LocalStorage</span></div>
+            <button class="open-btn" data-project="todo"><i class="fa-regular fa-eye"></i> Chi tiết</button>
+          </div>
+        </article>
+
+        <article class="project" data-aos="fade-up" data-aos-delay="120">
+          <div class="thumb" style="background-image:url('https://picsum.photos/640/360?random=13');"></div>
+          <div class="content">
+            <h5>💼 Portfolio</h5>
+            <p class="muted">Trang cá nhân chuyên nghiệp, nhiều hiệu ứng tương tác.</p>
+            <div class="tags"><span class="tag">AOS</span><span class="tag">Canvas</span><span class="tag">Vanilla JS</span></div>
+            <button class="open-btn" data-project="folio"><i class="fa-regular fa-eye"></i> Chi tiết</button>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal chi tiết dự án (dùng 1 modal, nạp nội dung động) -->
+  <div class="modalx" id="projectModal" aria-hidden="true" role="dialog">
+    <div class="overlay" data-close="modal"></div>
+    <div class="dialog">
+      <button class="btn btn-sm btn-outline-light float-end" data-close="modal"><i class="fa-solid fa-xmark"></i> Đóng</button>
+      <div class="spacer-24"></div>
+      <h4 id="pm-title">Tiêu đề</h4>
+      <p class="muted" id="pm-desc">Mô tả</p>
+      <img id="pm-img" alt="Ảnh dự án" class="img-fluid rounded-3 border" src="" />
+      <div class="spacer-24"></div>
+      <div id="pm-tech" class="d-flex flex-wrap gap-2"></div>
+    </div>
+  </div>
+
+  <!-- =============================================================
+       GALLERY – HÌNH ẢNH CỦA TÔI
+       ============================================================= -->
+  <section id="gallery" class="section">
+    <div class="container-narrow">
+      <h2 class="section-title" data-aos="fade-up"><i class="fa-regular fa-images"></i> Hình ảnh của tôi</h2>
+      <p class="section-subtitle" data-aos="fade-up" data-aos-delay="60">Bộ sưu tập ảnh cá nhân – bấm để phóng to (lightbox). Thay đường dẫn ảnh theo ý bạn.</p>
+      <hr class="neon-hr" />
+
+      <div class="gallery-grid" data-aos="zoom-in">
+        <!-- TODO: Thay các ảnh placeholder bằng ảnh thật của bạn -->
+        <a class="gimg" href="#" data-idx="0"><img src="ảnh1.jpg" alt="Ảnh 1" /></a>
+        <a class="gimg" href="#" data-idx="1"><img src="ảnh4.jpg" alt="Ảnh 2" /></a>
+        <a class="gimg" href="#" data-idx="2"><img src="ảnh5.jpg" alt="Ảnh 3" /></a>
+        <a class="gimg" href="#" data-idx="3"><img src="ảnh6.jpg" alt="Ảnh 4" /></a>
+        
+      </div>
+    </div>
+  </section>
+
+  <!-- Lightbox cho gallery -->
+  <div class="lightbox" id="gLightbox" aria-hidden="true" role="dialog">
+    <button class="close" aria-label="Đóng" title="Đóng (Esc)"><i class="fa-solid fa-xmark"></i></button>
+    <button class="prev" aria-label="Ảnh trước" title="Trước (←)"><i class="fa-solid fa-chevron-left"></i></button>
+    <img src="" alt="Preview" />
+    <button class="next" aria-label="Ảnh kế" title="Kế (→)"><i class="fa-solid fa-chevron-right"></i></button>
+  </div>
+
+  <!-- =============================================================
+       CV DOWNLOAD + FOOTER
+       ============================================================= -->
+  <section id="cv" class="section">
+    <div class="container-narrow cta-wrap" data-aos="zoom-in">
+      <h2 class="section-title"><i class="fa-regular fa-file-lines"></i> Tải CV của tôi</h2>
+      <p class="section-subtitle">Bạn có thể đính kèm file PDF tên <code>cv_ngohoanghao.pdf</code> cùng thư mục để nút hoạt động.</p>
+      <a class="download-btn" href="Ngô Hoàng Hảo – Portfolio.pdf" download><i class="fa-solid fa-download"></i> Tải CV</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container-narrow">
+      &copy; 2025 Ngô Hoàng Hảo • Made with ❤ & lots of <span title="JavaScript">JS</span>
+      <div class="mt-2">
+        <a href="#home" class="btn-neon">Lên đầu</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scroll to top floating button -->
+  <button id="scrollTopBtn" aria-label="Lên đầu trang"><i class="fa-solid fa-arrow-up"></i></button>
+
+  <!-- ========================= Scripts ========================= -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+
+  <script>
+    /* =============================================================
+       AOS INIT
+       ============================================================= */
+    AOS.init({ duration: 900, once: true, offset: 60 });
+
+    /* =============================================================
+       DARK MODE TOGGLE – lưu bằng localStorage, hỗ trợ phím tắt D
+       ============================================================= */
+    const body = document.body;
+    const darkToggle = document.getElementById('darkToggle');
+
+    const THEME_KEY = 'portfolio-theme';
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const savedTheme = localStorage.getItem(THEME_KEY);
+
+    function applyTheme(mode){
+      if(mode === 'light') body.classList.add('light-mode');
+      else body.classList.remove('light-mode');
+      localStorage.setItem(THEME_KEY, mode);
+      darkToggle.innerHTML = body.classList.contains('light-mode')
+        ? '<i class="fa-solid fa-sun"></i> <span class="d-none d-sm-inline">Light Mode</span>'
+        : '<i class="fa-solid fa-moon"></i> <span class="d-none d-sm-inline">Dark Mode</span>';
+    }
+
+    applyTheme(savedTheme ? savedTheme : (prefersDark ? 'dark' : 'dark'));
+
+    darkToggle.addEventListener('click', () => {
+      const next = body.classList.contains('light-mode') ? 'dark' : 'light';
+      applyTheme(next);
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if(e.key.toLowerCase() === 'd'){
+        const next = body.classList.contains('light-mode') ? 'dark' : 'light';
+        applyTheme(next);
+      }
+    });
+
+    /* =============================================================
+       SCROLL TOP BUTTON
+       ============================================================= */
+    const scrollBtn = document.getElementById('scrollTopBtn');
+    window.addEventListener('scroll', () => {
+      if(window.scrollY > 260) scrollBtn.classList.add('show'); else scrollBtn.classList.remove('show');
+    });
+    scrollBtn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+    /* =============================================================
+       SKILL BARS – animate on intersection
+       ============================================================= */
+    const skillObserver = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if(entry.isIntersecting){
+          entry.target.querySelectorAll('.bar').forEach(b => {
+            const lvl = b.getAttribute('data-level') || '0%';
+            b.style.width = lvl;
+          });
+          // chỉ chạy 1 lần
+          skillObserver.unobserve(entry.target);
+        }
+      });
+    }, { threshold: .35 });
+
+    document.querySelectorAll('.skill').forEach(el => skillObserver.observe(el));
+
+    /* =============================================================
+       PROJECT MODAL – nội dung nạp động theo data-project
+       ============================================================= */
+    const PROJECTS = {
+      resto: {
+        title: 'Website Nhà hàng',
+        desc: 'Thiết kế landing page nhà hàng với hiệu ứng mượt, menu sticky, đặt bàn nhanh. Tối ưu responsive và tốc độ tải.',
+        img: 'https://www.parkhyattsaigonrestaurants.com/vi/opera?src=agn_oth_en_disp_fnblocal_dv360_dirresp_pro_banner_cm_bsd&gad_source=1',
+        tech: ['HTML','CSS','Bootstrap','AOS']
+      },
+      todo: {
+        title: 'Todo App',
+        desc: 'Quản lý công việc cá nhân, kéo thả thứ tự, lọc trạng thái, lưu LocalStorage. Code gọn, dễ mở rộng.',
+        img: 'https://to-do.office.com/tasks/',
+        tech: ['React','Hooks','LocalStorage']
+      },
+      folio: {
+        title: 'Portfolio',
+        desc: 'Trang cá nhân tối, neon, có hiệu ứng chuột, lightbox ảnh, modal dự án, skill progress on scroll, tilt 3D.',
+        img: 'https://picsum.photos/960/540?random=113',
+        tech: ['Vanilla JS','Canvas','AOS']
+      }
+    };
+
+    const modal = document.getElementById('projectModal');
+    const pmTitle = document.getElementById('pm-title');
+    const pmDesc = document.getElementById('pm-desc');
+    const pmImg = document.getElementById('pm-img');
+    const pmTech = document.getElementById('pm-tech');
+
+    function openProjectModal(key){
+      const data = PROJECTS[key];
+      if(!data) return;
+      pmTitle.textContent = data.title;
+      pmDesc.textContent = data.desc;
+      pmImg.src = data.img;
+      pmTech.innerHTML = '';
+      data.tech.forEach(t => {
+        const b = document.createElement('span');
+        b.className = 'badgex';
+        b.textContent = t;
+        pmTech.appendChild(b);
+      });
+      modal.classList.add('active');
+      modal.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeProjectModal(){
+      modal.classList.remove('active');
+      modal.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.open-btn').forEach(btn => {
+      btn.addEventListener('click', () => openProjectModal(btn.dataset.project));
+    });
+
+    modal.addEventListener('click', (e) => {
+      if(e.target.dataset.close === 'modal' || e.target.closest('[data-close="modal"]')) closeProjectModal();
+    });
+
+    window.addEventListener('keydown', (e) => {
+      if(e.key === 'Escape' && modal.classList.contains('active')) closeProjectModal();
+    });
+
+    /* =============================================================
+       GALLERY LIGHTBOX – có điều hướng bằng phím ← → Esc
+       ============================================================= */
+    const gLightbox = document.getElementById('gLightbox');
+    const gImgs = Array.from(document.querySelectorAll('.gallery-grid .gimg img'));
+    const lbImg = gLightbox.querySelector('img');
+    const prevBtn = gLightbox.querySelector('.prev');
+    const nextBtn = gLightbox.querySelector(' .next');
+    const closeBtn = gLightbox.querySelector('.close');
+
+    let curIdx = 0;
+
+    function showLightbox(idx){
+      curIdx = (idx + gImgs.length) % gImgs.length;
+      lbImg.src = gImgs[curIdx].src;
+      gLightbox.classList.add('active');
+      gLightbox.setAttribute('aria-hidden','false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hideLightbox(){
+      gLightbox.classList.remove('active');
+      gLightbox.setAttribute('aria-hidden','true');
+      document.body.style.overflow = '';
+    }
+
+    function navLightbox(step){ showLightbox(curIdx + step); }
+
+    document.querySelectorAll('.gimg').forEach(a => {
+      a.addEventListener('click', (e) => { e.preventDefault(); const idx = +a.dataset.idx; showLightbox(idx); });
+    });
+
+    prevBtn.addEventListener('click', () => navLightbox(-1));
+    nextBtn.addEventListener('click', () => navLightbox(1));
+    closeBtn.addEventListener('click', hideLightbox);
+    gLightbox.addEventListener('click', (e) => { if(e.target === gLightbox) hideLightbox(); });
+
+    window.addEventListener('keydown', (e) => {
+      if(!gLightbox.classList.contains('active')) return;
+      if(e.key === 'ArrowLeft') navLightbox(-1);
+      else if(e.key === 'ArrowRight') navLightbox(1);
+      else if(e.key === 'Escape') hideLightbox();
+    });
+
+    /* =============================================================
+       KEYBOARD SHORTCUTS – Ctrl+K mở Quick Search (demo)
+       ============================================================= */
+    window.addEventListener('keydown', (e) => {
+      if((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k'){
+        e.preventDefault();
+        alert('Quick Search demo: gõ để tìm (tính năng demo).');
+      }
+    });
+
+    /* =============================================================
+       VANILLA TILT INIT – cho avatar, hobby, skill cards
+       ============================================================= */
+    if(window.VanillaTilt){
+      VanillaTilt.init(document.querySelectorAll('[data-tilt]'));
+    }
+
+    /* =============================================================
+       CURSOR PARTICLES – hiệu ứng hạt chạy theo chuột bằng Canvas
+       - Tối ưu performance, tự resize, limit fps
+       ============================================================= */
+    const canvas = document.getElementById('fx-canvas');
+    const ctx = canvas.getContext('2d');
+    let W = canvas.width = canvas.offsetWidth;
+    let H = canvas.height = canvas.offsetHeight;
+
+    // Lắng nghe resize
+    const resizeObserver = new ResizeObserver(entries => {
+      for (const entry of entries){
+        const cr = entry.contentRect;
+        W = canvas.width = Math.floor(cr.width * devicePixelRatio);
+        H = canvas.height = Math.floor(cr.height * devicePixelRatio);
+        canvas.style.width = cr.width + 'px';
+        canvas.style.height = cr.height + 'px';
+      }
+    });
+    resizeObserver.observe(canvas);
+
+    // Tham số hạt
+    const MAX_PARTICLES = 140;        // số hạt tối đa
+    const PARTICLE_TTL = 1200;        // vòng đời (ms)
+    const PARTICLE_SIZE = [1.2, 3.2]; // min, max px
+    const PARTICLE_SPEED = [0.04, 0.18]; // min, max px/ms
+    const COLORS = ['#5f7cff', '#9b5cff', '#35d0ff'];
+
+    const particles = [];
+    let mouseX = -9999, mouseY = -9999; // ngoài khung
+    let lastTime = 0;
+
+    // Util random
+    const rand = (min, max) => Math.random() * (max - min) + min;
+
+    function addParticle(x, y){
+      const now = performance.now();
+      const size = rand(PARTICLE_SIZE[0], PARTICLE_SIZE[1]);
+      const speed = rand(PARTICLE_SPEED[0], PARTICLE_SPEED[1]);
+      const angle = rand(0, Math.PI * 2);
+      const vx = Math.cos(angle) * speed * (Math.random() < .5 ? -1 : 1);
+      const vy = Math.sin(angle) * speed;
+      particles.push({
+        x: x * devicePixelRatio,
+        y: y * devicePixelRatio,
+        vx, vy,
+        size: size * devicePixelRatio,
+        color: COLORS[Math.floor(Math.random() * COLORS.length)],
+        born: now,
+        ttl: PARTICLE_TTL
+      });
+      if(particles.length > MAX_PARTICLES) particles.shift();
+    }
+
+    // Vệt sáng theo chuột (trail)
+    window.addEventListener('mousemove', (e) => {
+      mouseX = e.clientX; mouseY = e.clientY;
+      for(let i=0;i<2;i++) addParticle(mouseX, mouseY);
+    });
+
+    // Ripple nhỏ khi click
+    window.addEventListener('click', (e) => {
+      for(let i=0;i<14;i++) addParticle(e.clientX, e.clientY);
+    });
+
+    function draw(t){
+      const dt = t - lastTime; lastTime = t;
+      ctx.clearRect(0,0,W,H);
+
+      // Parallax gradient hơi nhẹ theo chuột
+      if(mouseX > -999){
+        const gx = mouseX / window.innerWidth; // 0..1
+        const gy = mouseY / window.innerHeight;
+        const grad = ctx.createRadialGradient(gx*W, gy*H, 60, gx*W, gy*H, 400);
+        grad.addColorStop(0, 'rgba(95,124,255,0.20)');
+        grad.addColorStop(1, 'rgba(95,124,255,0.00)');
+        ctx.fillStyle = grad;
+        ctx.fillRect(0,0,W,H);
+      }
+
+      // Vẽ hạt
+      const now = performance.now();
+      for(let i = particles.length - 1; i >= 0; i--){
+        const p = particles[i];
+        const age = now - p.born;
+        const life = 1 - age / p.ttl; // 1..0
+        if(life <= 0){ particles.splice(i,1); continue; }
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        const alpha = Math.max(0, Math.min(.9, life));
+        ctx.globalAlpha = alpha;
+        ctx.fillStyle = p.color;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+
+      requestAnimationFrame(draw);
+    }
+    requestAnimationFrame(draw);
+
+    /* =============================================================
+       PARALLAX NHẸ TRONG HERO – dựa theo vị trí chuột
+       ============================================================= */
+    const hero = document.querySelector('header.hero');
+    const heroInner = document.querySelector('.hero-inner');
+    hero.addEventListener('mousemove', (e) => {
+      const r = hero.getBoundingClientRect();
+      const cx = (e.clientX - r.left) / r.width - 0.5;  // -0.5..0.5
+      const cy = (e.clientY - r.top) / r.height - 0.5;
+      heroInner.style.transform = `translate3d(${cx * 10}px, ${cy * 10}px, 0)`;
+    });
+    hero.addEventListener('mouseleave', () => { heroInner.style.transform = ''; });
+
+    /* =============================================================
+       OBSERVER để lazy-animate các .cardx (thêm class on-visible)
+       ============================================================= */
+    const cardObserver = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if(e.isIntersecting){ e.target.classList.add('on-visible'); cardObserver.unobserve(e.target); }
+      });
+    }, { threshold: .15 });
+    document.querySelectorAll('.cardx').forEach(c => cardObserver.observe(c));
+
+  </script>
+</body>
+</html>
